@@ -2,6 +2,16 @@ import axios from "axios";
 import { UltraSwapRequest, UltraSwapResponse } from "../types/types";
 
 export class SwapService {
+  private readonly headers = {
+    accept: "application/json",
+    "sec-ch-ua":
+      '"Google Chrome";v="137", "Chromium";v="137", "Not/A)Brand";v="24"',
+    "sec-ch-ua-mobile": "?0",
+    "sec-ch-ua-platform": '"macOS"',
+    Referer: "https://jup.ag/",
+    "User-Agent":
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36",
+  };
   static async getUltraSwap(
     params: UltraSwapRequest
   ): Promise<UltraSwapResponse | null> {
@@ -35,6 +45,20 @@ export class SwapService {
       return response.data;
     } catch (error) {
       console.error("Failed to fetch token price", error);
+      return null;
+    }
+  }
+  public async getTokenInfo(addresses: string[]) {
+    const url = `https://datapi.jup.ag/v1/pools?assetIds=${addresses.join(
+      ","
+    )}`;
+    try {
+      const response = await axios.get(url, {
+        headers: this.headers,
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Failed to fetch token info", error);
       return null;
     }
   }

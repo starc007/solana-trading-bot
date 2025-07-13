@@ -2,9 +2,14 @@ import { DexScreenerClient } from "./services/DexScreenerClient";
 import { TokenSwap } from "./services/TokenSwap";
 import { WalletService } from "./services/WalletService";
 import { logger } from "./utils/logger";
+import { connectToDatabase } from "./config/mongoose";
 
 async function main() {
   let dexScreener: DexScreenerClient | null = null;
+
+  (async () => {
+    await connectToDatabase();
+  })();
 
   try {
     // Initialize wallet

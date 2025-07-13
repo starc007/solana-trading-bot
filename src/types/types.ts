@@ -54,3 +54,21 @@ export interface UltraSwapRequest {
   taker: string;
   swapMode: string;
 }
+
+export interface Position {
+  tokenAddress: string;
+  tokenInfo: {
+    name: string;
+    symbol: string;
+    decimals: number;
+    logoURI: string;
+    mcap: number;
+  };
+  amount: number;
+  avgBuyPrice: number;
+  openTimestamp: Date;
+  closeTimestamp?: Date;
+  status: "open" | "closed";
+  realizedPnl?: number;
+  lastPrice?: number;
+}
