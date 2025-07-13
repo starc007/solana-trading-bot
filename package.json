@@ -17,6 +17,7 @@
     "chalk": "^5.4.1",
     "dotenv": "^16.4.7",
     "mongoose": "^8.16.3",
+    "node-cron": "^4.2.1",
     "puppeteer": "^24.2.0",
     "puppeteer-real-browser": "^1.4.0",
     "ws": "^8.18.0"

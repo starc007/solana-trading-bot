@@ -3,18 +3,49 @@ import { TokenSwap } from "./services/TokenSwap";
 import { WalletService } from "./services/WalletService";
 import { logger } from "./utils/logger";
 import { connectToDatabase } from "./config/mongoose";
+import cron from "node-cron";
+import { BuyStrategyService } from "./services/BuyStrategyService";
+import { PositionService } from "./services/PositionService";
+import { USDC_MINT_ADDRESS } from "./utils/constants";
 
 async function main() {
   let dexScreener: DexScreenerClient | null = null;
+  const walletService = new WalletService();
+  const owner = walletService.getPublicKey().toString();
 
   (async () => {
     await connectToDatabase();
-  })();
 
-  try {
+    // Replace with your actual wallet/account info
+
+    // // Schedule buy strategy to run every 5 minutes
+    cron.schedule("*/5 * * * *", async () => {
+      try {
+        await BuyStrategyService.run(owner, USDC_MINT_ADDRESS);
+      } catch (err) {
+        console.error("Buy strategy error:", err);
+      }
+    });
+
+    // Schedule sell/exit logic to run every 5 minutes
+    cron.schedule("*/5 * * * *", async () => {
+      try {
+        const openPositions = await PositionService.getOpenPositions();
+        for (const pos of openPositions) {
+          // Run PnL check and handle sell/exit for each position
+          await PositionService.checkAndHandlePnL(
+            owner,
+            pos.tokenAddress,
+            USDC_MINT_ADDRESS
+          );
+        }
+      } catch (err) {
+        console.error("PnL check error:", err);
+      }
+    });
+
     // Initialize wallet
-    const walletService = new WalletService();
-    logger.success(`Wallet loaded: ${walletService.getPublicKey().toString()}`);
+    logger.success(`Wallet loaded: ${owner}`);
     const solBalance = await walletService.getSolBalance();
     logger.info(`My Sol balance: ${solBalance}`);
 
@@ -36,13 +67,7 @@ async function main() {
       }
       process.exit(0);
     });
-  } catch (error) {
-    logger.error("Application error:", error);
-    if (dexScreener) {
-      await dexScreener.disconnect();
-    }
-    process.exit(1);
-  }
+  })();
 }
 
 main();

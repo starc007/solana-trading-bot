@@ -32,25 +32,28 @@ export class TokenSwap {
     };
     const ultraSwapResponse: UltraSwapResponse | null =
       await SwapService.getUltraSwap(ultraSwapRequest);
-    if (ultraSwapResponse) {
-      // Open a position
-      await PositionService.openPosition({
-        tokenAddress: outputMint,
-        tokenInfo: {
-          name: tokenInfo.name,
-          symbol: tokenInfo.symbol,
-          decimals: tokenInfo.decimals,
-          logoURI: tokenInfo.logoURI,
-          mcap: tokenInfo.mcap,
-        },
-        amount: Number(ultraSwapResponse.outAmount),
-        avgBuyPrice:
-          ultraSwapResponse.inUsdValue / Number(ultraSwapResponse.outAmount),
-        status: "open",
-        openTimestamp: new Date(),
-      });
-    }
-    return ultraSwapResponse;
+    console.log("ultraSwapResponse", ultraSwapResponse);
+    // if (ultraSwapResponse) {
+    //   // Open a position
+    //   await PositionService.openPosition({
+    //     tokenAddress: outputMint,
+    //     tokenInfo: {
+    //       name: tokenInfo.name,
+    //       symbol: tokenInfo.symbol,
+    //       decimals: tokenInfo.decimals,
+    //       logoURI: tokenInfo.logoURI,
+    //       mcap: tokenInfo.mcap,
+    //     },
+    //     amount: Number(ultraSwapResponse.outAmount) / 10 ** tokenInfo.decimals,
+    //     avgBuyPrice:
+    //       ultraSwapResponse.inUsdValue /
+    //       Number(ultraSwapResponse.outAmount) /
+    //       10 ** tokenInfo.decimals,
+    //     status: "open",
+    //     openTimestamp: new Date(),
+    //   });
+    // }
+    // return ultraSwapResponse;
   }
 
   static async sellToken(
@@ -85,7 +88,9 @@ export class TokenSwap {
     if (ultraSwapResponse) {
       // Calculate PnL
       const sellPrice =
-        ultraSwapResponse.outUsdValue / Number(ultraSwapResponse.inAmount);
+        ultraSwapResponse.outUsdValue /
+        Number(ultraSwapResponse.inAmount) /
+        10 ** tokenInfo.decimals;
       const pnl = PositionService.calculatePnL(avgBuyPrice, sellPrice);
       // Close the position
       await PositionService.closePosition(positionId, pnl, sellPrice);

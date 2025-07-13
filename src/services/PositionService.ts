@@ -39,7 +39,7 @@ export class PositionService {
   }
 
   static async getOpenPositions(): Promise<IPosition[]> {
-    return Position.find({ status: "open" }).exec();
+    return Position.find({ status: "open" }).sort({ openTimestamp: -1 }).exec();
   }
 
   static calculatePnL(avgBuyPrice: number, currentPrice: number): number {
@@ -61,7 +61,8 @@ export class PositionService {
       const priceData = await new SwapService().getTokenPrice([
         pos.tokenAddress,
       ]);
-      const currentPrice = priceData?.[pos.tokenAddress]?.price;
+      console.log("priceData", priceData);
+      const currentPrice = priceData?.prices?.[pos.tokenAddress];
       if (!currentPrice) continue;
       const pnl = this.calculatePnL(pos.avgBuyPrice, currentPrice);
       if (pnl > 30) {

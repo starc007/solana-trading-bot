@@ -27,7 +27,7 @@ export class DexScreenerClient {
   constructor() {
     this.outputPath = path.join(__dirname, "../../data/top_tokens.json");
     this.url =
-      "https://dexscreener.com/solana/5m?rankBy=trendingScoreM5&order=desc";
+      "https://dexscreener.com/solana/5m?rankBy=trendingScoreH6&order=desc&maxAge=1";
   }
 
   public async connect(): Promise<void> {
