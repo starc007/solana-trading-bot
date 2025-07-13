@@ -1,14 +1,14 @@
 import { SwapService } from "./SwapService";
 import { UltraSwapRequest, UltraSwapResponse } from "../types/types";
 import { PositionService } from "./PositionService";
+import { USDC_MINT_ADDRESS } from "../utils/constants";
+import { logger } from "../utils/logger";
 
-const USDC_MINT = "USDC_MINT_ADDRESS"; // Replace with actual USDC mint address
+const USDC_MINT = USDC_MINT_ADDRESS;
 
 export class TokenSwap {
   static async buyToken(
     owner: string,
-    inputAccount: string,
-    outputAccount: string,
     amount: number,
     tokenInfo: {
       name: string;
@@ -23,16 +23,24 @@ export class TokenSwap {
     const outputMint = tokenInfo.address;
     const taker = owner;
     const swapMode = "ExactIn";
+    const tokenAmount = Math.floor(Number(amount));
     const ultraSwapRequest: UltraSwapRequest = {
       inputMint,
       outputMint,
-      amount: amount.toString(),
+      amount: tokenAmount.toString(),
       taker,
       swapMode,
     };
     const ultraSwapResponse: UltraSwapResponse | null =
       await SwapService.getUltraSwap(ultraSwapRequest);
-    console.log("ultraSwapResponse", ultraSwapResponse);
+    console.log(
+      "ultraSwapResponse",
+      JSON.stringify(ultraSwapResponse, null, 2)
+    );
+    if (ultraSwapResponse?.errorMessage) {
+      logger.error("Error swapping tokens", ultraSwapResponse.errorMessage);
+      return;
+    }
     // if (ultraSwapResponse) {
     //   // Open a position
     //   await PositionService.openPosition({

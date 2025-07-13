@@ -45,6 +45,7 @@ export interface UltraSwapResponse {
   priceImpact: number;
   swapUsdValue: number;
   totalTime: number;
+  errorMessage?: string;
 }
 
 export interface UltraSwapRequest {

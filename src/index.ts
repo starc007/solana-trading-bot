@@ -18,19 +18,20 @@ async function main() {
 
     // Replace with your actual wallet/account info
 
-    // // Schedule buy strategy to run every 5 minutes
-    cron.schedule("*/5 * * * *", async () => {
+    // // Schedule buy strategy to run every 2 minutes
+    cron.schedule("*/1 * * * *", async () => {
       try {
-        await BuyStrategyService.run(owner, USDC_MINT_ADDRESS);
+        await BuyStrategyService.run(owner);
       } catch (err) {
         console.error("Buy strategy error:", err);
       }
     });
 
-    // Schedule sell/exit logic to run every 5 minutes
-    cron.schedule("*/5 * * * *", async () => {
+    // Schedule sell/exit logic to run every 2 minutes
+    cron.schedule("*/2 * * * *", async () => {
       try {
         const openPositions = await PositionService.getOpenPositions();
+        if (openPositions.length === 0) return;
         for (const pos of openPositions) {
           // Run PnL check and handle sell/exit for each position
           await PositionService.checkAndHandlePnL(
