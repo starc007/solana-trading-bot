@@ -6,6 +6,7 @@ import { connect } from "puppeteer-real-browser";
 
 interface Token {
   symbol: string;
+  address: string;
   price: number;
   volume24h: number;
   age: string;
@@ -109,6 +110,19 @@ export class DexScreenerClient {
 
       logger.info("Starting evaluation...");
       const tokens = await page.evaluate(() => {
+        // Add helper function inside evaluate
+        const parseVolume = (volumeText: string): number => {
+          const value = volumeText.replace("$", "").trim();
+          const multiplier = value.endsWith("K")
+            ? 1000
+            : value.endsWith("M")
+            ? 1000000
+            : value.endsWith("B")
+            ? 1000000000
+            : 1;
+          return parseFloat(value.replace(/[KMB]/g, "")) * multiplier;
+        };
+
         const rows = Array.from(
           document.querySelectorAll("a[class*='ds-dex-table-row']")
         ).slice(0, 10);
@@ -116,12 +130,22 @@ export class DexScreenerClient {
         console.log("Found rows:", rows.length);
 
         return rows.map((row) => {
+          // Get token address from icon image URL
+          const tokenImg = row.querySelector(
+            ".ds-dex-table-row-token-icon-img"
+          );
+          let address = null;
+          if (tokenImg) {
+            const imgSrc = tokenImg.getAttribute("src") || "";
+            const matches = imgSrc.match(/\/solana\/(.+?)\.png/);
+            address = matches ? matches[1] : null;
+          }
+
           // Get symbol
           const symbol =
             row
               .querySelector(".ds-dex-table-row-base-token-symbol")
               ?.textContent?.trim() || "";
-
           // Get price
           const priceText =
             row
@@ -129,14 +153,12 @@ export class DexScreenerClient {
               ?.textContent?.trim() || "0";
           const price = parseFloat(priceText.replace("$", ""));
 
-          // Get volume
+          // Get volume with units
           const volumeText =
             row
               .querySelector(".ds-dex-table-row-col-volume")
               ?.textContent?.trim() || "0";
-          const volume24h = parseFloat(
-            volumeText.replace("$", "").replace(/[KMB]/g, "")
-          );
+          const volume24h = parseVolume(volumeText);
 
           // Get age
           const age =
@@ -152,6 +174,7 @@ export class DexScreenerClient {
 
           return {
             symbol,
+            address,
             price,
             volume24h,
             age,

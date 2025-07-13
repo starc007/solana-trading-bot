@@ -10,7 +10,9 @@
     "watch": "tsc -w"
   },
   "dependencies": {
+    "@raydium-io/raydium-sdk-v2": "^0.1.111-alpha",
     "@solana/web3.js": "^1.98.0",
+    "axios": "^1.7.9",
     "bs58": "^6.0.0",
     "chalk": "^5.4.1",
     "dotenv": "^16.4.7",

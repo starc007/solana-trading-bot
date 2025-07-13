@@ -1,4 +1,5 @@
 import { DexScreenerClient } from "./services/DexScreenerClient";
+import { TokenSwap } from "./services/TokenSwap";
 import { WalletService } from "./services/WalletService";
 import { logger } from "./utils/logger";
 
@@ -9,11 +10,19 @@ async function main() {
     // Initialize wallet
     const walletService = new WalletService();
     logger.success(`Wallet loaded: ${walletService.getPublicKey().toString()}`);
+    const solBalance = await walletService.getSolBalance();
+    logger.info(`My Sol balance: ${solBalance}`);
 
     // Initialize and connect to DexScreener
     dexScreener = new DexScreenerClient();
-    await dexScreener.connect();
+    // await dexScreener.connect();
 
+    await TokenSwap.swap(
+      walletService.getPublicKey().toString(),
+      "So11111111111111111111111111111111111111112",
+      "Cngcf9cBRmdiY3nF6D95fHYdhDhQJNgLW6T71BTUpump",
+      1000000000
+    );
     // Handle application shutdown
     process.on("SIGINT", async () => {
       logger.info("Shutting down...");

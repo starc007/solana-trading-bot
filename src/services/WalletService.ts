@@ -1,13 +1,20 @@
-import { Keypair, PublicKey } from "@solana/web3.js";
+import {
+  Connection,
+  Keypair,
+  PublicKey,
+  LAMPORTS_PER_SOL,
+} from "@solana/web3.js";
 import { env } from "../config/environment";
 import { logger } from "../utils/logger";
 import bs58 from "bs58";
 
 export class WalletService {
   private wallet: Keypair;
+  private connection: Connection;
 
   constructor() {
     this.wallet = this.loadWalletFromPrivateKey(env.solanaPrivateKey);
+    this.connection = new Connection(env.solanaRpcUrl);
   }
 
   private loadWalletFromPrivateKey(privateKeyString: string): Keypair {
@@ -37,5 +44,10 @@ export class WalletService {
 
   public getWallet(): Keypair {
     return this.wallet;
+  }
+
+  public async getSolBalance(): Promise<number> {
+    const balance = await this.connection.getBalance(this.getPublicKey());
+    return balance / LAMPORTS_PER_SOL;
   }
 }
