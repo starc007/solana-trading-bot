@@ -3,6 +3,9 @@ import path from "path";
 import { logger } from "../utils/logger";
 // import puppeteer, { Browser } from "puppeteer";
 import { connect } from "puppeteer-real-browser";
+import { Token } from "../models/Token";
+import { SwapService } from "./SwapService";
+import { TokenService } from "./TokenService";
 
 interface Token {
   symbol: string;
@@ -23,7 +26,8 @@ export class DexScreenerClient {
 
   constructor() {
     this.outputPath = path.join(__dirname, "../../data/top_tokens.json");
-    this.url = "https://dexscreener.com/?rankBy=trendingScoreH1&order=desc";
+    this.url =
+      "https://dexscreener.com/solana/5m?rankBy=trendingScoreM5&order=desc";
   }
 
   public async connect(): Promise<void> {
@@ -68,9 +72,52 @@ export class DexScreenerClient {
     while (this.isRunning) {
       try {
         const tokens = await this.scrapeTokens();
-        console.log(tokens);
-        logger.success(`Scraped ${tokens.length} tokens`);
-        await this.saveToFile(tokens);
+
+        // Fetch richer token info from SwapService
+        const addresses = tokens.map((t) => t.address).filter(Boolean);
+        const swapService = new SwapService();
+        const tokenInfoApi = await swapService.getTokenInfo(addresses);
+        // console.log("tokenInfoApi", tokenInfoApi);
+        const pools = tokenInfoApi?.pools || [];
+        // Filter tokens by createdAt (within last 24 hours)
+        const now = Date.now();
+        const oneWeekMs = 7 * 24 * 60 * 60 * 1000;
+        const tokensWithInfo = pools?.filter((t: any) => {
+          const createdAt = t?.createdAt;
+          if (!createdAt) return false;
+          const createdAtTime = new Date(createdAt).getTime();
+          return now - createdAtTime <= oneWeekMs;
+        });
+
+        // console.log("tokensWithInfo", JSON.stringify(tokensWithInfo, null, 2));
+
+        if (tokensWithInfo.length === 0) {
+          logger.info("No tokens to save");
+          await new Promise((resolve) =>
+            setTimeout(resolve, this.pollInterval)
+          );
+          continue;
+        }
+
+        // Save to database (upsert by address)
+        for (const t of tokensWithInfo) {
+          const baseAsset = t?.baseAsset || {};
+          await TokenService.upsertToken({
+            address: baseAsset.id,
+            name: baseAsset.name,
+            symbol: baseAsset.symbol,
+            decimals: baseAsset.decimals,
+            logoURI: baseAsset.icon,
+            mcap: baseAsset.mcap,
+            liquidity: t?.liquidity,
+            volume24h: t?.volume24h,
+            createdAt: baseAsset.createdAt,
+            price: baseAsset.usdPrice,
+            age: t.age,
+            priceChange1h: t.priceChange1h,
+          });
+        }
+        logger.success(`Saved ${tokensWithInfo.length} tokens to DB`);
         // Wait before next poll
         await new Promise((resolve) => setTimeout(resolve, this.pollInterval));
       } catch (error) {
