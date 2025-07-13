@@ -15,14 +15,14 @@ async function main() {
 
     // Initialize and connect to DexScreener
     dexScreener = new DexScreenerClient();
-    // await dexScreener.connect();
+    await dexScreener.connect();
 
-    await TokenSwap.swap(
-      walletService.getPublicKey().toString(),
-      "So11111111111111111111111111111111111111112",
-      "Cngcf9cBRmdiY3nF6D95fHYdhDhQJNgLW6T71BTUpump",
-      1000000000
-    );
+    // await TokenSwap.swap(
+    //   walletService.getPublicKey().toString(),
+    //   "So11111111111111111111111111111111111111112",
+    //   "Cngcf9cBRmdiY3nF6D95fHYdhDhQJNgLW6T71BTUpump",
+    //   1000000000
+    // );
     // Handle application shutdown
     process.on("SIGINT", async () => {
       logger.info("Shutting down...");
