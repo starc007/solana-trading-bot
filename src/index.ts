@@ -1,5 +1,4 @@
 import { DexScreenerClient } from "./services/DexScreenerClient";
-import { TokenSwap } from "./services/TokenSwap";
 import { WalletService } from "./services/WalletService";
 import { logger } from "./utils/logger";
 import { connectToDatabase } from "./config/mongoose";
@@ -15,8 +14,6 @@ async function main() {
 
   (async () => {
     await connectToDatabase();
-
-    // Replace with your actual wallet/account info
 
     // // Schedule buy strategy to run every 2 minutes
     cron.schedule("*/1 * * * *", async () => {
@@ -48,19 +45,13 @@ async function main() {
     // Initialize wallet
     logger.success(`Wallet loaded: ${owner}`);
     const solBalance = await walletService.getSolBalance();
+    const usdcBalance = await walletService.getUsdcBalance();
     logger.info(`My Sol balance: ${solBalance}`);
+    logger.info(`My USDC balance: ${usdcBalance}`);
 
     // Initialize and connect to DexScreener
     dexScreener = new DexScreenerClient();
     await dexScreener.connect();
-
-    // await TokenSwap.swap(
-    //   walletService.getPublicKey().toString(),
-    //   "So11111111111111111111111111111111111111112",
-    //   "Cngcf9cBRmdiY3nF6D95fHYdhDhQJNgLW6T71BTUpump",
-    //   1000000000
-    // );
-    // Handle application shutdown
     process.on("SIGINT", async () => {
       logger.info("Shutting down...");
       if (dexScreener) {

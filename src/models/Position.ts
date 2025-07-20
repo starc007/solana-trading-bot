@@ -16,6 +16,8 @@ export interface IPosition extends Document {
   status: "open" | "closed";
   realizedPnl?: number;
   lastPrice?: number;
+  signature?: string[];
+  totalBuyAmount?: number;
 }
 
 const PositionSchema: Schema = new Schema({
@@ -34,6 +36,8 @@ const PositionSchema: Schema = new Schema({
   status: { type: String, enum: ["open", "closed"], required: true },
   realizedPnl: { type: Number },
   lastPrice: { type: Number },
+  signature: { type: [String] },
+  totalBuyAmount: { type: Number },
 });
 
 export const Position = mongoose.model<IPosition>("Position", PositionSchema);

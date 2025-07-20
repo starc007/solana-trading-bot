@@ -3,9 +3,11 @@ import { UltraSwapRequest, UltraSwapResponse } from "../types/types";
 import { PositionService } from "./PositionService";
 import { USDC_MINT_ADDRESS } from "../utils/constants";
 import { logger } from "../utils/logger";
+import { WalletService } from "./WalletService";
 
 const USDC_MINT = USDC_MINT_ADDRESS;
 
+const walletService = new WalletService();
 export class TokenSwap {
   static async buyToken(
     owner: string,
@@ -37,30 +39,37 @@ export class TokenSwap {
       "ultraSwapResponse",
       JSON.stringify(ultraSwapResponse, null, 2)
     );
-    if (ultraSwapResponse?.errorMessage) {
-      logger.error("Error swapping tokens", ultraSwapResponse.errorMessage);
+    if (ultraSwapResponse?.errorMessage || !ultraSwapResponse?.transaction) {
+      logger.error(
+        "Error swapping tokens",
+        ultraSwapResponse?.errorMessage || "No transaction"
+      );
       return;
     }
-    // if (ultraSwapResponse) {
-    //   // Open a position
-    //   await PositionService.openPosition({
-    //     tokenAddress: outputMint,
-    //     tokenInfo: {
-    //       name: tokenInfo.name,
-    //       symbol: tokenInfo.symbol,
-    //       decimals: tokenInfo.decimals,
-    //       logoURI: tokenInfo.logoURI,
-    //       mcap: tokenInfo.mcap,
-    //     },
-    //     amount: Number(ultraSwapResponse.outAmount) / 10 ** tokenInfo.decimals,
-    //     avgBuyPrice:
-    //       ultraSwapResponse.inUsdValue /
-    //       Number(ultraSwapResponse.outAmount) /
-    //       10 ** tokenInfo.decimals,
-    //     status: "open",
-    //     openTimestamp: new Date(),
-    //   });
-    // }
+
+    const signature = await walletService.executeSwap(
+      ultraSwapResponse.transaction
+    );
+    console.log("signature", signature);
+    if (signature) {
+      // Open a position
+      await PositionService.openPosition({
+        tokenAddress: outputMint,
+        tokenInfo: {
+          name: tokenInfo.name,
+          symbol: tokenInfo.symbol,
+          decimals: tokenInfo.decimals,
+          logoURI: tokenInfo.logoURI,
+          mcap: tokenInfo.mcap,
+        },
+        amount: Number(ultraSwapResponse.outAmount) / 10 ** tokenInfo.decimals,
+        avgBuyPrice: ultraSwapResponse.inUsdValue,
+        totalBuyAmount: ultraSwapResponse.inUsdValue,
+        status: "open",
+        openTimestamp: new Date(),
+        signature: [signature],
+      });
+    }
     // return ultraSwapResponse;
   }
 
