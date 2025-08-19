@@ -11,6 +11,7 @@ export class BuyStrategyService {
       {
         liquidity: { $gt: 20000 },
         mcap: { $gt: 40000, $lt: 5000000 },
+        timestamp: { $gt: new Date(Date.now() - 1000 * 60 * 60 * 24) }, // 24 hours ago
       },
       20
     );

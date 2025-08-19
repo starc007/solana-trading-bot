@@ -102,16 +102,37 @@ export class TokenSwap {
     };
     const ultraSwapResponse: UltraSwapResponse | null =
       await SwapService.getUltraSwap(ultraSwapRequest);
-    if (ultraSwapResponse) {
-      // Calculate PnL
-      const sellPrice =
-        ultraSwapResponse.outUsdValue /
-        Number(ultraSwapResponse.inAmount) /
-        10 ** tokenInfo.decimals;
-      const pnl = PositionService.calculatePnL(avgBuyPrice, sellPrice);
-      // Close the position
-      await PositionService.closePosition(positionId, pnl, sellPrice);
+    if (ultraSwapResponse?.errorMessage || !ultraSwapResponse?.transaction) {
+      logger.error(
+        "Error swapping tokens",
+        ultraSwapResponse?.errorMessage || "No transaction"
+      );
+      return;
     }
+
+    // Calculate PnL
+    const sellPrice =
+      ultraSwapResponse.outUsdValue /
+      Number(ultraSwapResponse.inAmount) /
+      10 ** tokenInfo.decimals;
+    const pnl = PositionService.calculatePnL(avgBuyPrice, sellPrice);
+    // Close the position
+
+    const signature = await walletService.executeSwap(
+      ultraSwapResponse.transaction
+    );
+
+    console.log("signature", signature);
+
+    if (signature) {
+      await PositionService.closePosition(
+        positionId,
+        pnl,
+        sellPrice,
+        signature
+      );
+    }
+
     return ultraSwapResponse;
   }
 }

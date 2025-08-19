@@ -17,8 +17,11 @@ export class PositionService {
   static async closePosition(
     positionId: string,
     realizedPnl: number,
-    lastPrice: number
+    lastPrice: number,
+    signature: string
   ): Promise<IPosition | null> {
+    const position = await Position.findById(positionId);
+    if (!position) return null;
     return Position.findByIdAndUpdate(
       positionId,
       {
@@ -26,6 +29,8 @@ export class PositionService {
         closeTimestamp: new Date(),
         realizedPnl,
         lastPrice,
+        // push signature to the array
+        signature: [...(position.signature || []), signature],
       },
       { new: true }
     ).exec();

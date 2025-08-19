@@ -1,7 +1,4 @@
-import { writeFile } from "fs/promises";
-import path from "path";
 import { logger } from "../utils/logger";
-// import puppeteer, { Browser } from "puppeteer";
 import { connect } from "puppeteer-real-browser";
 import { Token } from "../models/Token";
 import { SwapService } from "./SwapService";
@@ -17,7 +14,6 @@ interface Token {
 }
 
 export class DexScreenerClient {
-  private readonly outputPath: string;
   private readonly url: string;
   private isRunning: boolean = false;
   private pollInterval: number = 30000; // 30 seconds
@@ -25,7 +21,6 @@ export class DexScreenerClient {
   private gotoPage: any | null = null;
 
   constructor() {
-    this.outputPath = path.join(__dirname, "../../data/top_tokens.json");
     this.url =
       "https://dexscreener.com/solana/5m?rankBy=trendingScoreH6&order=desc&maxAge=1";
   }
@@ -235,15 +230,6 @@ export class DexScreenerClient {
     } catch (error) {
       logger.error("Error scraping tokens:", error);
       throw error;
-    }
-  }
-
-  private async saveToFile(tokens: Token[]): Promise<void> {
-    try {
-      await writeFile(this.outputPath, JSON.stringify(tokens, null, 2));
-      logger.success("Top tokens saved successfully");
-    } catch (error) {
-      logger.error("Error saving tokens:", error);
     }
   }
 
