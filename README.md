@@ -1,10 +1,10 @@
 # Solana DEX Bot
 
-A Solana-based trading bot that automatically monitors and trades tokens on decentralized exchanges using Jupiter's Ultra API.
+A Solana-based trading bot that automatically monitors and trade trending tokens of Dexscreener using Jupiter's API.
 
 ## Features
 
-- **Automated Trading**: Monitors trending tokens and executes buy/sell orders
+- **Automated Trading**: Monitors trending tokens of Dexscreener and executes buy/sell orders
 - **Position Management**: Tracks open positions with PnL monitoring
 - **Risk Management**: Automatic stop-loss (-25%) and take-profit (30%) triggers
 - **Real-time Data**: Scrapes DexScreener for trending tokens
