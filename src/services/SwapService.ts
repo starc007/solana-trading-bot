@@ -31,7 +31,7 @@ export class SwapService {
       });
       return response.data;
     } catch (error) {
-      console.error("Failed to fetch ultra swap", error);
+      // console.error("Failed to fetch ultra swap", error);
       return null;
     }
   }
