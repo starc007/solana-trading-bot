@@ -22,7 +22,7 @@ A Solana-based trading bot that automatically monitors and trade trending tokens
    Create a `.env` file:
 
    ```
-   SOLANA_PRIVATE_KEY=your_private_key
+   SOLANA_PRIVATE_KEY=your_wallet_private_key
    SOLANA_RPC_URL=your_rpc_endpoint
    MONGODB_URI=your_mongodb_connection_string
    ```
