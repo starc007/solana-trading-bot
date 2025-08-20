@@ -5,7 +5,7 @@ import { connectToDatabase } from "./config/mongoose";
 import cron from "node-cron";
 import { BuyStrategyService } from "./services/BuyStrategyService";
 import { PositionService } from "./services/PositionService";
-import { SOL_MINT_ADDRESS, USDC_MINT_ADDRESS } from "./utils/constants";
+import { USDC_MINT_ADDRESS } from "./utils/constants";
 
 async function main() {
   let dexScreener: DexScreenerClient | null = null;
