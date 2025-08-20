@@ -66,7 +66,6 @@ export class PositionService {
       const priceData = await new SwapService().getTokenPrice([
         pos.tokenAddress,
       ]);
-      console.log("priceData", priceData);
       const currentPrice = priceData?.prices?.[pos.tokenAddress];
       if (!currentPrice) continue;
       const pnl = this.calculatePnL(pos.avgBuyPrice, currentPrice);

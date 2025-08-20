@@ -15,7 +15,7 @@ async function main() {
   (async () => {
     await connectToDatabase();
 
-    // // Schedule buy strategy to run every 2 minutes
+    // Schedule buy strategy to run every 2 minutes
     cron.schedule("*/1 * * * *", async () => {
       try {
         await BuyStrategyService.run(owner);

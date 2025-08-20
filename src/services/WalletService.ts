@@ -54,10 +54,32 @@ export class WalletService {
   }
 
   public async getUsdcBalance(): Promise<number> {
-    const balance = await this.connection.getTokenAccountBalance(
-      new PublicKey(USDC_MINT_ADDRESS)
-    );
-    return Number(balance.value.amount) / 10 ** 6;
+    try {
+      // Get all token accounts for the wallet
+      const tokenAccounts = await this.connection.getTokenAccountsByOwner(
+        this.getPublicKey(),
+        {
+          mint: new PublicKey(USDC_MINT_ADDRESS),
+        }
+      );
+
+      if (tokenAccounts.value.length === 0) {
+        return 0;
+      }
+
+      // Get the balance of the first USDC token account
+      const balance = await this.connection.getTokenAccountBalance(
+        tokenAccounts.value[0].pubkey
+      );
+
+      // USDC has 6 decimal places
+      return (
+        Number(balance.value.amount) / Math.pow(10, balance.value.decimals)
+      );
+    } catch (error) {
+      logger.error("Failed to get USDC balance", error);
+      return 0;
+    }
   }
 
   public async executeSwap(swapTransaction: string) {

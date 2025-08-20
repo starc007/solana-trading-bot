@@ -19,6 +19,7 @@ export class TokenSwap {
       logoURI: string;
       mcap: number;
       address: string;
+      price: number;
     }
   ) {
     const inputMint = USDC_MINT;
@@ -33,12 +34,10 @@ export class TokenSwap {
       taker,
       swapMode,
     };
+
     const ultraSwapResponse: UltraSwapResponse | null =
       await SwapService.getUltraSwap(ultraSwapRequest);
-    console.log(
-      "ultraSwapResponse",
-      JSON.stringify(ultraSwapResponse, null, 2)
-    );
+
     if (ultraSwapResponse?.errorMessage || !ultraSwapResponse?.transaction) {
       logger.error(
         "Error swapping tokens",
@@ -63,8 +62,8 @@ export class TokenSwap {
           mcap: tokenInfo.mcap,
         },
         amount: Number(ultraSwapResponse.outAmount) / 10 ** tokenInfo.decimals,
-        avgBuyPrice: ultraSwapResponse.inUsdValue,
-        totalBuyAmount: ultraSwapResponse.inUsdValue,
+        avgBuyPrice: tokenInfo.price,
+        totalBuyAmount: tokenInfo.price * Number(ultraSwapResponse.outAmount),
         status: "open",
         openTimestamp: new Date(),
         signature: [signature],
